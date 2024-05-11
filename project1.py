@@ -88,11 +88,11 @@ def menu():
         except: 
                 print("Please enter From option 1-3")  
         if (option == 1 ): 
-
+            #FoodChecker() uses FoodData Central API
         elif(option ==2 ):
-
+            #CalTracker() creates a list that tracks cals eaten in a day then at the end lets you add it to a csv file
         elif(option ==3 ): 
-            exit()
+            exit() 
     return option 
 
 main ()
