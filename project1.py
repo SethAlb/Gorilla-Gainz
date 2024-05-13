@@ -1,7 +1,19 @@
 #Gorilla gains fitness app 
 #Author: Seth Albergaira 
 #\n
-import time 
+#1105073 
+import time,requests, csv 
+import mysql.connector
+
+global name 
+global mydb 
+
+mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password='Seth', 
+        database="gorillagainz "
+        )
 
 def main(): 
     running = True 
@@ -13,8 +25,20 @@ def main():
     WelcomeMessage(name)
     Cals = DailyCals(weight,goal)
     while (running == True):
-        option = menu()
+        option = menu(name)
     
+
+def AddCals(Food,Calories,name):    
+   
+    mycursor = mydb.cursor()
+
+    date = input("Enter date: ")
+
+    sql = "INSERT INTO calorietracker (name, Food,Calories,day) VALUES (%s, %s,%s,%s)"
+    val = (name, Food, Calories,date)
+    
+    mycursor.execute(sql, val)
+    mydb.commit()
 
 
 
@@ -78,7 +102,36 @@ def DailyCals(w,g):
         print("You need "+ str(Cals) +" a day to gain weight")
     return Cals 
 
-def menu(): 
+def FoodChecker(name):
+    apikey = "k8Bt3s6IchI/f39NvI3NAA==Q81aHPy4MJqLWj7t"
+    food = input("Enter: (Serving amnt food )")
+    url = 'https://api.calorieninjas.com/v1/nutrition?query='
+    response = requests.get(url + food, headers={'X-Api-Key': apikey})
+    json_data = response.json()
+    calories = json_data["items"][0]["calories"]
+    print (calories)
+    food = json_data["items"][0]["name"]
+
+    add = input("Would you like to add this to your Calorie  Tracker?\n1: Y \n2: N")
+
+    if (add == "Y"):
+        AddCals(food,calories,name)  
+    elif(add == "N"): 
+        print("")
+    elif(): 
+        add = input ("please enter either Y or N ")
+
+
+def viewCals(name): 
+    mycursor = mydb.cursor()
+    sql = "SELECT * FROM calorietracker WHERE name ='"+name+"'"
+    mycursor.execute(sql)
+    myresult = mycursor.fetchall()
+    for x in myresult:
+        print(x)
+
+
+def menu(name): 
     print("What Would you like to do \n1:Food Checker \n2:Cal Tracker \n3:Exit")
     n=False
     while (n==False):
@@ -88,9 +141,9 @@ def menu():
         except: 
                 print("Please enter From option 1-3")  
         if (option == 1 ): 
-            #FoodChecker() uses FoodData Central API
+            FoodChecker(name)
         elif(option ==2 ):
-            #CalTracker() creates a list that tracks cals eaten in a day then at the end lets you add it to a csv file
+                viewCals(name)
         elif(option ==3 ): 
             exit() 
     return option 
